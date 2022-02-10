@@ -1,10 +1,18 @@
 package br.edu.ifpe.tads.pdm.pratica04;
 
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentActivity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -12,12 +20,16 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.Task;
 
 import java.util.Date;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+
+    final static int FINE_LOCATION_REQUEST = 1;
+    private boolean fine_location;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +39,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        requestPermission();
+    }
+
+    private void requestPermission() {
+        int permissionCheck = ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION);
+
+        this.fine_location = (permissionCheck == PackageManager.PERMISSION_GRANTED);
+
+        if (this.fine_location) return;
+        ActivityCompat.requestPermissions(this,
+                new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                FINE_LOCATION_REQUEST);
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        boolean granted = (grantResults.length > 0) &&
+                (grantResults[0] == PackageManager.PERMISSION_GRANTED);
+
+        this.fine_location = (requestCode == FINE_LOCATION_REQUEST) && granted;
+
+        if (mMap != null) {
+            mMap.setMyLocationEnabled(this.fine_location);
+        }
+
+        findViewById(R.id.button_location).setEnabled(this.fine_location);
     }
 
     @Override
@@ -64,5 +105,33 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 position(latLng).
                 title("Adicionado em " + new Date()).
                 icon(BitmapDescriptorFactory.defaultMarker(0))));
+
+        mMap.setOnMyLocationButtonClickListener(() -> {
+            Toast.makeText(MapsActivity.this,
+                "Indo para a sua localização.", Toast.LENGTH_SHORT).show();
+            return false;
+        });
+
+        mMap.setOnMyLocationClickListener(
+                location -> Toast.makeText(MapsActivity.this,
+                        "Você está aqui!", Toast.LENGTH_SHORT).show());
+
+        mMap.setMyLocationEnabled(this.fine_location);
+
+        findViewById(R.id.button_location).setEnabled(this.fine_location);
     }
+
+    public void currentLocation(View view) {
+        FusedLocationProviderClient fusedLocationProviderClient =
+                LocationServices.getFusedLocationProviderClient(this);
+        Task<Location> task = fusedLocationProviderClient.getLastLocation();
+        task.addOnSuccessListener(location -> {
+            if(location!=null) {
+                Toast.makeText(MapsActivity.this, "Localização atual: \n" +
+                        "Lat: " + location.getLatitude() + " " +
+                        "Long: " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }
