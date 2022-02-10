@@ -77,17 +77,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng caruaru = new LatLng(-8.27, -35.98);
         LatLng joaopessoa = new LatLng(-7.12, -34.84);
 
-        mMap.addMarker( new MarkerOptions().
+        mMap.addMarker(new MarkerOptions().
                 position(recife).
                 title("Recife").
                 icon(BitmapDescriptorFactory.defaultMarker(35)));
 
-        mMap.addMarker( new MarkerOptions().
+        mMap.addMarker(new MarkerOptions().
                 position(caruaru).
                 title("Caruaru").
                 icon(BitmapDescriptorFactory.defaultMarker(120)));
 
-        mMap.addMarker( new MarkerOptions().
+        mMap.addMarker(new MarkerOptions().
                 position(joaopessoa).
                 title("João Pessoa").
                 icon(BitmapDescriptorFactory.defaultMarker(230)));
@@ -101,14 +101,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return false;
         });
 
-        mMap.setOnMapClickListener(latLng -> mMap.addMarker( new MarkerOptions().
+        mMap.setOnMapClickListener(latLng -> mMap.addMarker(new MarkerOptions().
                 position(latLng).
                 title("Adicionado em " + new Date()).
                 icon(BitmapDescriptorFactory.defaultMarker(0))));
 
         mMap.setOnMyLocationButtonClickListener(() -> {
             Toast.makeText(MapsActivity.this,
-                "Indo para a sua localização.", Toast.LENGTH_SHORT).show();
+                    "Indo para a sua localização.", Toast.LENGTH_SHORT).show();
             return false;
         });
 
